@@ -26,7 +26,7 @@ export function Input({
   return (
     <Container>
       <Label>{title}</Label>
-      {error && <Error>{error}</Error>}
+      {<Error>{error}</Error>}
       <Controller
         name={name}
         control={control}
