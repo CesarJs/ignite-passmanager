@@ -1,11 +1,13 @@
 import React, { useEffect } from 'react';
 import { Alert, KeyboardAvoidingView, Platform } from 'react-native';
-import { useForm } from 'react-hook-form';
 import { RFValue } from 'react-native-responsive-fontsize';
 import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import uuid from 'react-native-uuid';
+import { useNavigation } from '@react-navigation/native';
+import { useForm } from 'react-hook-form';
+import { useStorage } from '../../hooks/data_storage';
 
 import { Input } from '../../components/Form/Input';
 import { Button } from '../../components/Form/Button';
@@ -30,6 +32,7 @@ const schema = Yup.object().shape({
 
 export function RegisterLoginData() {
 	const dataKey = '@passmanager:logins';
+	const navigation = useNavigation();
   const {
     control,
     handleSubmit,
@@ -40,9 +43,8 @@ export function RegisterLoginData() {
   } = useForm({
 		resolver: yupResolver(schema)
 	});
-	// useEffect(() => {
-	// 	console.log(errors);
-	// }, [errors]);
+
+	const { saveDataStorage } = useStorage();
   async function handleRegister(formData: FormData) {
     const newLoginData = {
       id: String(uuid.v4()),
@@ -50,10 +52,10 @@ export function RegisterLoginData() {
     }
 
     try {
-			const currentData = await AsyncStorage.getItem(dataKey);
-			const dataParsed = currentData ? JSON.parse(currentData) : [];
-			const newData = [...dataParsed, newLoginData];
-			await AsyncStorage.setItem(dataKey, JSON.stringify(newData));
+
+			saveDataStorage(newLoginData);
+			reset();
+			navigation.navigate("Home");
 		} catch (error) {
 			console.log(error);
 			Alert.alert("Não foi possivel salvar o novo dado");
@@ -63,7 +65,7 @@ export function RegisterLoginData() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       enabled
     >
       <Container>

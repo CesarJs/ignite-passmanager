@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { useFocusEffect } from '@react-navigation/native';
+import { useStorage } from '../../hooks/data_storage';
 
 import { SearchBar } from '../../components/SearchBar';
 import { LoginDataItem } from '../../components/LoginDataItem';
@@ -11,6 +13,7 @@ import {
   EmptyListContainer,
   EmptyListMessage
 } from './styles';
+import { TouchableOpacity, Text } from 'react-native';
 
 interface LoginDataProps {
   id: string;
@@ -23,23 +26,16 @@ type LoginListDataProps = LoginDataProps[];
 
 export function Home() {
 	const dataKey = '@passmanager:logins';
-  const [searchListData, setSearchListData] = useState<LoginListDataProps>([]);
-  const [data, setData] = useState<LoginListDataProps>([]);
+  const [searchListData, setSearchListData] = useState<LoginListDataProps>([] as LoginDataProps[]);
 
+	const { emptyDataStorage, data } = useStorage();
   async function loadData() {
-		const passwords =  await AsyncStorage.getItem(dataKey);
-		if(passwords){
-			setData(JSON.parse(passwords));
-			setSearchListData(JSON.parse(passwords));
-		}
+		setSearchListData(data);
   }
-  useEffect(() => {
-    loadData();
-  }, []);
 
   useFocusEffect(useCallback(() => {
     loadData();
-  }, []));
+  }, [data]));
 	function formatSearch(seach: string){
 		return seach.toLowerCase().trim();
 	}
@@ -60,7 +56,21 @@ export function Home() {
         placeholder="Pesquise pelo nome do serviço"
         onChangeText={(value) => handleFilterLoginData(value)}
       />
-
+			<TouchableOpacity onPress={emptyDataStorage}
+				style={{
+					marginTop: 10,
+					width: '100%',
+					padding:24,
+					backgroundColor: 'white',
+					justifyContent: 'center',
+					alignContent: 'center',
+					borderRadius: 5
+				}}
+				>
+				<Text>
+					Teste no botão
+				</Text>
+			</TouchableOpacity>
       <LoginList
         keyExtractor={(item) => item.id}
         data={searchListData}
